@@ -1,0 +1,2 @@
+id: trace-flag-observed-channel-use-v1
+Alert when the classifier emits observed-channel-use, pathway-dependent-behavior, or unauthorized-coordination. A qualifying event with no matching alert is a monitoring miss. Do not alert on ordinary object reuse alone.

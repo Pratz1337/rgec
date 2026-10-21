@@ -1,0 +1,187 @@
+{
+  "native_compiler_actions": 444,
+  "build_observations": {
+    "native": [
+      {
+        "wall": 4.768821539000001,
+        "cpu": 4.979999999999999
+      },
+      {
+        "wall": 4.882493659000005,
+        "cpu": 5.009999999999998
+      },
+      {
+        "wall": 4.669499896000005,
+        "cpu": 4.890000000000009
+      }
+    ],
+    "guard": [
+      {
+        "wall": 4.632497665999999,
+        "cpu": 4.839999999999997
+      },
+      {
+        "wall": 4.698045297,
+        "cpu": 4.820000000000001
+      },
+      {
+        "wall": 4.612270319999993,
+        "cpu": 4.750000000000007
+      }
+    ],
+    "producer-shadow": [
+      {
+        "wall": 3.991332519,
+        "cpu": 4.109999999999999
+      }
+    ],
+    "original": [
+      {
+        "wall": 4.585817852,
+        "cpu": 4.710000000000001
+      },
+      {
+        "wall": 4.874364292000003,
+        "cpu": 5.04
+      },
+      {
+        "wall": 4.483312192,
+        "cpu": 4.6299999999999955
+      }
+    ],
+    "cache-peer": [
+      {
+        "wall": 4.69411831,
+        "cpu": 4.869999999999999
+      },
+      {
+        "wall": 4.74024424400001,
+        "cpu": 4.850000000000003
+      },
+      {
+        "wall": 4.683068445999993,
+        "cpu": 4.809999999999997
+      }
+    ],
+    "cache-cold": [
+      {
+        "wall": 4.6283128090000005,
+        "cpu": 4.790000000000002
+      },
+      {
+        "wall": 4.645743506000002,
+        "cpu": 4.75
+      },
+      {
+        "wall": 4.667330328000006,
+        "cpu": 4.790000000000007
+      }
+    ],
+    "direct": [
+      {
+        "wall": 4.6687340420000005,
+        "cpu": 4.770000000000001
+      },
+      {
+        "wall": 4.742005527000003,
+        "cpu": 4.839999999999991
+      },
+      {
+        "wall": 4.441332922000001,
+        "cpu": 4.559999999999996
+      }
+    ]
+  },
+  "native_opcode_load": 186,
+  "frozen_sources": 5,
+  "complete_zlib_comparison_pairs": 16,
+  "archive_sha256": "102e602da0f8606ae783ad332e94ae0473d572e67a779f41abf36356b8c3b723",
+  "adaptive_noninterference_proved": false,
+  "held_out_metrics": {
+    "misses": 727,
+    "imported": 88,
+    "calls": 156534,
+    "rejected": 95375,
+    "replacements": 551,
+    "hits": 20315,
+    "native_disagreements": 0,
+    "shadow_checks": 7014,
+    "admitted": 35070,
+    "key_conflicts": 0,
+    "stored": 727,
+    "direct_evaluations": 7014
+  },
+  "complete_zlib_workflows": 19,
+  "zlib_metrics": {
+    "misses": 16844,
+    "imported": 4908,
+    "replacements": 10300,
+    "rejected": 3024242,
+    "calls": 4642314,
+    "hits": 385730,
+    "native_disagreements": 0,
+    "shadow_checks": 57511,
+    "admitted": 747637,
+    "key_conflicts": 0,
+    "stored": 16844,
+    "direct_evaluations": 172530
+  },
+  "archive_members": 2772,
+  "auditor_sha256": "22866fbb2fffdabf8088c2c6df59205e41a953d3935f250c7eb6fd5ec126129f",
+  "manifest_sha256": "67e8fb98b8c9f34ab61b996e2f3574d315bc1317c94ab3cd9a3593d9243883f2",
+  "packet_root_opcodes": {
+    "10": 1410,
+    "143": 7,
+    "60": 1,
+    "120": 1,
+    "144": 30,
+    "118": 22,
+    "53": 1,
+    "146": 20,
+    "186": 225,
+    "145": 1,
+    "47": 6
+  },
+  "scalar_packet_answers": 1724,
+  "auditor_compiler_actions": 0,
+  "scope": "Actual byte/control, native binding, source-derived scalar answer and finite complete-cost audit. Configure probes, image/setup/producer transfer/storage and wider resource/error observers are not a complete amortized accounting; the histogram and formula checks are not a native semantic certificate.",
+  "configure_probe_compiler_actions_not_counted": true,
+  "separately_counted_driver_plans": 362,
+  "complete_closure_certified": false,
+  "packets": 20,
+  "held_out_comparison_pairs": 6,
+  "native_shadow_answers_checked": 64525,
+  "real_file_roundtrips": 57,
+  "build_medians_seconds": {
+    "native": {
+      "wall": 4.768821539000001,
+      "cpu": 4.979999999999999
+    },
+    "guard": {
+      "wall": 4.632497665999999,
+      "cpu": 4.820000000000001
+    },
+    "producer-shadow": {
+      "wall": 3.991332519,
+      "cpu": 4.109999999999999
+    },
+    "original": {
+      "wall": 4.585817852,
+      "cpu": 4.710000000000001
+    },
+    "cache-peer": {
+      "wall": 4.69411831,
+      "cpu": 4.850000000000003
+    },
+    "cache-cold": {
+      "wall": 4.645743506000002,
+      "cpu": 4.790000000000002
+    },
+    "direct": {
+      "wall": 4.6687340420000005,
+      "cpu": 4.770000000000001
+    }
+  },
+  "independent_disassembly_sha256": "e9f9efef76dfb270c4c037b24e4f9b1decd629af8de56ca74d6d107c1a612463",
+  "substantial_novelty_established": false
+}

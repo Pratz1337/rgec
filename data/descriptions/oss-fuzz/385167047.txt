@@ -1,0 +1,1 @@
+A vulnerability exists in avformat/ipmovie where signature_buffer is read without proper checks, leading to the use of uninitialized data.

@@ -1,0 +1,1 @@
+A vulnerability exists in ExtractTileJPG() where JPEG tiles are not enforced to be read by the JPEG coder.

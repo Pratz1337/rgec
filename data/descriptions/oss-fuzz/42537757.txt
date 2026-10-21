@@ -1,0 +1,1 @@
+A vulnerability exists in the openpgp module where, during RSA key pair generation using PKCS#15 init, the driver accepts responses relevant to ECC keys. This causes further processing in pkcs15-init to fail or access invalid parts of structures.

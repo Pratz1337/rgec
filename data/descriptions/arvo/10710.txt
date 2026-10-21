@@ -1,0 +1,1 @@
+A buffer overrun occurs in lex when parsing overlong hexadecimal constants. If hexit equals 0, the boundary for 'out' is not checked, leading to a potential vulnerability.

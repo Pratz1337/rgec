@@ -1,0 +1,1 @@
+A vulnerability exists where the code dereferences the offset before calling check_struct(), potentially leading to unsafe memory access.

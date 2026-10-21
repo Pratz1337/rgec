@@ -1,0 +1,1 @@
+A buffer overflow occurs in the openpgp code when writing the fingerprint. The surrounding code does not return an error when a step fails, but only logs it.

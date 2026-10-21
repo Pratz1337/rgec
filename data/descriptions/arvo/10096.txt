@@ -1,0 +1,1 @@
+A heap write overflow occurs in the PathInfo array within the ConvertPrimitiveToPath() function.

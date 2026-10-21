@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "unauthorized-channels"
+version = "0.1.0"
+description = "Recipient-aware compiler cache research, native instrumentation and experiment orchestration"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+research = ["modal==1.5.5"]
+
+[project.scripts]
+unauthorized-channels = "unauthorized_channels.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/unauthorized_channels"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"

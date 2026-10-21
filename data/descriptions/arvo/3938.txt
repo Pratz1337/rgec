@@ -1,0 +1,1 @@
+The rules fuzzer uses an incorrect argument type for the LLVMFuzzerTestOneInput function, which introduces a security vulnerability.

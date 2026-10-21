@@ -1,0 +1,1 @@
+A vulnerability exists in the loop restoration multi-threading code where, when luma loop restoration is disabled, the initialization of cur_sb_col in lr_sync does not occur correctly.
