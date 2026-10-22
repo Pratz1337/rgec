@@ -19,6 +19,7 @@ This directory keeps the implementation's original internal layout. Use `code/` 
 |---|---|
 | [modal_rgec_knownbits_scope.py](modal_rgec_knownbits_scope.py) | Complete-workflow scalar candidate and baselines |
 | [modal_rgec_knownbits_cost.py](modal_rgec_knownbits_cost.py) | Native cost and result census |
+| [modal_rgec_sanitizer_cost.py](modal_rgec_sanitizer_cost.py) | Matched full-build sanitizer/coverage interventions using the existing native census tool |
 | [modal_rgec_native_transition.py](modal_rgec_native_transition.py) | Native capture and finite transition-model checks |
 | [modal_rgec_native_contract.py](modal_rgec_native_contract.py) | Conditional native memory-contract construction |
 | [modal_rgec_native_sample_audit.py](modal_rgec_native_sample_audit.py) | Separate byte/data audits |

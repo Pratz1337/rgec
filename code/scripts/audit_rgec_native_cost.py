@@ -36,7 +36,10 @@ def main(root):
             p=Path(member.name); assert member.isfile() and p.parts[0]=='raw' and '..' not in p.parts
             assert archive.extractfile(member).read()==(root/p).read_bytes()
     evidence=read(raw/'evidence.json'); config=read(root/'knownbits-scope-config.json')
-    assert evidence['suite_complete'] and len(evidence['rows'])==config['blocks']*3 and len(evidence['held_out'])==3
+    arms=config.get('arms',[dict(name=None,flags=config['flags'])])
+    arm_names=[a['name'] for a in arms]; assert len(set(arm_names))==len(arms)
+    assert evidence['suite_complete'] and len(evidence['rows'])==config['blocks']*3*len(arms) and len(evidence['held_out'])==3*len(arms)
+    if 'tool_sha256' in config: assert evidence['tool_sha256']==config['tool_sha256']
     assert sha((raw/'native-bindings.json').read_bytes())==evidence['native_bindings_sha256']
     binding=read(raw/'native-bindings.json'); proof=(raw/'native-proof.elf').read_bytes()
     patched=Path('/rgec-knownbits-scope').read_bytes()
@@ -50,14 +53,23 @@ def main(root):
     for region in binding['regions']:
         start,size=region['file_offset'],region['size']; assert sha(patched[start:start+size])==region['sha256']
     assert sha((root/'clang_knownbits_cost_census.cpp').read_bytes())==evidence['tool_sha256']['/clang_knownbits_cost_census.cpp']
-    compiler_actions=plans=pairs=0; costs=collections.defaultdict(list)
+    compiler_actions=plans=pairs=0; costs=collections.defaultdict(list); expected_census={}
     for row in evidence['rows']:
+        arm=row.get('arm'); assert arm in arm_names
+        if 'arms' in config:
+            flags=next(a['flags'] for a in arms if a['name']==arm); assert row['flags']==flags
         actions=[json.loads(line) for line in (raw/row['label']/'actions.jsonl').read_text().splitlines()]
         assert actions==row['compiler_actions'] and len(actions)==23
         assert sum(a['plan'] is not None for a in actions)==19
         compiler_actions+=len(actions); plans+=19
         for action in actions:
             assert action['returncode']==0
+            if action['plan']:
+                if row['mode']=='census': expected_census[row['label']+'/'+action['label']+'.census']=arm
+                if 'arms' in config:
+                    assert all(f in action['driver_arguments'] for f in flags)
+                    for flag in ('-fsanitize=address','-fsanitize-address-use-after-scope','-fsanitize=fuzzer-no-link'):
+                        assert (flag in action['driver_arguments'])==(flag in flags)
             for suffix in ('stdout','stderr'):
                 assert sha((raw/row['label']/(action['label']+'.'+suffix)).read_bytes())==action[suffix+'_sha256']
                 if action['plan']: assert sha((raw/row['label']/(action['label']+'.plan.'+suffix)).read_bytes())==action['plan'][suffix+'_sha256']
@@ -67,25 +79,47 @@ def main(root):
         for phase in [row['configure'],row['build'],row['tests']]+[p[k] for p in row['roundtrips'] for k in ('encode','decode')]:
             assert phase['returncode']==0
             for suffix in ('stdout','stderr'): assert sha((raw/(phase['label']+'.'+suffix)).read_bytes())==phase[suffix+'_sha256']
-        costs[row['mode']].append(dict(cpu=row['build']['child_cpu_seconds']+row['build']['controller_cpu_seconds'],wall=row['build']['wall_seconds']))
+        key=arm+'/'+row['mode'] if arm is not None else row['mode']
+        costs[key].append(dict(cpu=row['build']['child_cpu_seconds']+row['build']['controller_cpu_seconds'],wall=row['build']['wall_seconds']))
     for block in range(config['blocks']):
-        order=['original','native','census']; random.Random(evidence['seed']+block).shuffle(order)
-        rows=[r for r in evidence['rows'] if r['block']==block]; assert [r['mode'] for r in rows]==order
-        reference=next(r for r in rows if r['mode']=='original')
+        block_rows=[r for r in evidence['rows'] if r['block']==block]
+        if 'arms' in config:
+            arm_order=list(arm_names); random.Random(evidence['seed']+block).shuffle(arm_order)
+            assert evidence['arm_order'][block]==arm_order
+            assert [r['arm'] for r in block_rows]==[a for a in arm_order for _ in range(3)]
+        for index,arm in enumerate(arm_names):
+            order=['original','native','census']
+            seed=evidence['seed']+100*(block+1)+index if 'arms' in config else evidence['seed']+block
+            random.Random(seed).shuffle(order)
+            rows=[r for r in block_rows if r.get('arm')==arm]; assert [r['mode'] for r in rows]==order
+            reference=next(r for r in rows if r['mode']=='original')
+            for row in rows:
+                assert row['order']==order.index(row['mode']) and row['artifacts']==reference['artifacts']
+                assert all(all(a[k]==b[k] for k in ('returncode','stdout_sha256','stderr_sha256')) for a,b in zip(row['compiler_actions'],reference['compiler_actions']))
+                assert all(row['tests'][k]==reference['tests'][k] for k in ('returncode','stdout_sha256','stderr_sha256'))
+                assert row['roundtrips'] and all(all(a[k]==b[k] for k in ('input_sha256','decoded_sha256','compressed_sha256','compressed_bytes')) for a,b in zip(row['roundtrips'],reference['roundtrips']))
+                if row['mode']!='original': assert all(row['reference_checks'].values()); pairs+=1
+    assert len(evidence['plans'])==len(arms)
+    for plan in evidence['plans']:
+        assert plan['returncode']==0
+        for suffix in ('stdout','stderr'): assert sha((raw/(plan['label']+'.'+suffix)).read_bytes())==plan[suffix+'_sha256']
+        if 'arms' in config:
+            flags=next(a['flags'] for a in arms if a['name']==plan['arm'])
+            assert plan['argv'][1:1+len(flags)]==flags
+    for arm in arm_names:
+        rows=[r for r in evidence['held_out'] if r.get('arm')==arm]
+        assert [r['variant'] for r in rows]==['original','native','census']
+        reference=rows[0]
         for row in rows:
-            assert row['order']==order.index(row['mode']) and row['artifacts']==reference['artifacts']
-            assert all(all(a[k]==b[k] for k in ('returncode','stdout_sha256','stderr_sha256')) for a,b in zip(row['compiler_actions'],reference['compiler_actions']))
-            assert all(row['tests'][k]==reference['tests'][k] for k in ('returncode','stdout_sha256','stderr_sha256'))
-            assert row['roundtrips'] and all(all(a[k]==b[k] for k in ('input_sha256','decoded_sha256','compressed_sha256','compressed_bytes')) for a,b in zip(row['roundtrips'],reference['roundtrips']))
-            if row['mode']!='original': assert all(row['reference_checks'].values()); pairs+=1
-    reference=evidence['held_out'][0]
-    for row in evidence['held_out']:
-        assert all(row[k]==reference[k] for k in ('returncode','stdout_sha256','stderr_sha256','object_sha256')) and row['returncode']==0
-        for suffix in ('stdout','stderr'): assert sha((raw/(row['label']+'.'+suffix)).read_bytes())==row[suffix+'_sha256']
-        assert sha((raw/(row['label']+'.o')).read_bytes())==row['object_sha256']
+            assert all(row[k]==reference[k] for k in ('returncode','stdout_sha256','stderr_sha256','object_sha256')) and row['returncode']==0
+            for suffix in ('stdout','stderr'): assert sha((raw/(row['label']+'.'+suffix)).read_bytes())==row[suffix+'_sha256']
+            assert sha((raw/(row['label']+'.o')).read_bytes())==row['object_sha256']
+            if row['variant']=='census': expected_census[row['label']+'.census']=arm
     names=codes((raw/'installed-ISDOpcodes.h').read_text()); families=collections.defaultdict(list); answers=collections.defaultdict(set)
-    total=outer_total=nested_total=migrations=0; files=[]; examples=[]
+    total=outer_total=nested_total=migrations=0; files=[]; examples=[]; arm_counts=collections.defaultdict(collections.Counter)
+    assert {p.relative_to(raw).as_posix() for p in raw.rglob('*.census')}==set(expected_census)
     for path in sorted(raw.rglob('*.census')):
+        arm=expected_census[path.relative_to(raw).as_posix()]
         body=path.read_bytes(); assert len(body)%160==0
         records=list(struct.iter_unpack('<20Q',body)); calibration=records[:64]; samples=records[64:]
         assert all(r[0]==0x524745434b435331 and r[1]==0 and r[2]==i for i,r in enumerate(calibration))
@@ -105,30 +139,33 @@ def main(root):
             outer.append(record); nested+=len(group)-1; root_id=high+1; group=[]
         assert not group and len(outer)+nested==len(samples)
         total+=len(samples); outer_total+=len(outer); nested_total+=nested
+        counts=arm_counts[arm if arm is not None else 'default']
+        counts.update(all_sample_records=len(samples),outer_sample_records=len(outer),nested_wrapped_records=nested)
         for r in outer:
-            if r[16]!=r[17]: migrations+=1; continue
+            if r[16]!=r[17]: migrations+=1; counts['cpu_migration_outer_records']+=1; continue
             if not (r[6]==0 and r[7]==1 and r[8]==1 and not r[19] and r[18]<=64): continue
             mask=(1<<r[18])-1; assert not r[10]&r[11] and (r[10]|r[11])<=mask
-            family=(r[3],r[4],r[12],r[13],r[14],r[5]); families[family].append(r[15]); answers[family].add((r[10],r[11],r[18]))
-            examples.append(dict(file=path.relative_to(raw).as_posix(),sequence=r[2],opcode=names.get(r[3],str(r[3])),
+            family=(arm,r[3],r[4],r[12],r[13],r[14],r[5]); families[family].append(r[15]); answers[family].add((r[10],r[11],r[18]))
+            examples.append(dict(arm=arm,file=path.relative_to(raw).as_posix(),sequence=r[2],opcode=names.get(r[3],str(r[3])),
                 width=r[4],children=[names.get(r[12],str(r[12])),names.get(r[13],str(r[13]))],
                 zero=r[10],one=r[11],window_cycles=r[15]))
         stable=[r[15] for r in calibration if r[16]==r[17]]
-        files.append(dict(path=path.relative_to(raw).as_posix(),sha256=sha(body),calls=len(samples),outer_calls=len(outer),nested_calls=nested,
+        files.append(dict(arm=arm,path=path.relative_to(raw).as_posix(),sha256=sha(body),calls=len(samples),outer_calls=len(outer),nested_calls=nested,
             calibration_median_cycles=statistics.median(stable) if stable else None,calibration_same_cpu_samples=len(stable)))
     summary=[]
     for family,values in families.items():
-        op,width,left,right,count,result=family
-        summary.append(dict(opcode=op,name=names.get(op,str(op)),width=width,children=[names.get(left,str(left)),names.get(right,str(right))],
+        arm,op,width,left,right,count,result=family
+        summary.append(dict(arm=arm,opcode=op,name=names.get(op,str(op)),width=width,children=[names.get(left,str(left)),names.get(right,str(right))],
             operands=count,result_number=result,samples=len(values),observed_answer_variants=len(answers[family]),
             nonunknown_answer_variants=sum(z!=0 or o!=0 for z,o,w in answers[family]),window_cycles_median=statistics.median(values),
             window_cycles_p90=quantile(values,.9),window_cycles_p99=quantile(values,.99),window_cycles_total=sum(values)))
     summary.sort(key=lambda r:r['window_cycles_total'],reverse=True)
     output=dict(manifest_sha256=sha((root/'evidence.json').read_bytes()),archive_sha256=sha((root/'raw.tar.gz').read_bytes()),
-        auditor_sha256=sha(Path(__file__).read_bytes()),archive_members=len(members),native_compiler_actions=compiler_actions+3,
-        separately_counted_driver_plans=plans+1,configure_and_image_compiler_actions_additional=True,
-        complete_zlib_workflows=len(evidence['rows']),complete_workflow_pairs=pairs,held_out_pairs=2,real_file_roundtrips=len(evidence['rows'])*3,
+        auditor_sha256=sha(Path(__file__).read_bytes()),archive_members=len(members),native_compiler_actions=compiler_actions+len(evidence['held_out']),
+        separately_counted_driver_plans=plans+len(evidence['plans']),configure_and_image_compiler_actions_additional=True,
+        complete_zlib_workflows=len(evidence['rows']),complete_workflow_pairs=pairs,held_out_pairs=2*len(arms),real_file_roundtrips=len(evidence['rows'])*3,
         all_sample_records=total,outer_sample_records=outer_total,nested_wrapped_records=nested_total,cpu_migration_outer_records=migrations,
+        flag_arms=arms,arm_sample_counts=arm_counts,
         census_files=files,scalar_depth0_same_cpu_outer_families=summary,
         largest_nonconstant_samples=sorted([r for r in examples if r['opcode'] not in ('Constant','TargetConstant') and (r['zero'] or r['one'])],key=lambda r:r['window_cycles'],reverse=True)[:24],
         build_cost_observations=costs,auditor_compiler_actions=0,certified_reusable_region=False,adaptive_noninterference_proved=False,substantial_novelty_established=False,

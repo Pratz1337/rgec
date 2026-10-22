@@ -26,9 +26,10 @@
 | Scalar computation-reuse prototype | **19 full zlib builds**, seven C++ compilations and **444 compiler executions** |
 | Comparison with native LLVM answers | **64,525 comparisons**, with zero observed mismatches in the tested domain |
 | Compiler-call profiling | **606,379 native calls**, with timing calibration and nested-call accounting |
+| Sanitizer/coverage intervention | **18 additional full zlib builds**, nine C++ compilations and **423 compiler executions** |
 | Native transition analysis | Four TLS-corrected symbolic templates and four conditional address contracts; a later arithmetic phase adds four finite path checks |
 
-These are separate experimental phases, not one combined sample. The results use retained runs from **11 October 2026**. The scalar cache passed its recorded controls but **did not outperform the capable direct-evaluation baseline**. [Read the measured results and their limits](docs/results.md).
+These are separate experimental phases, not one combined sample. The results use retained runs from **11 and 22 October 2026**. The scalar cache passed its recorded controls but **did not outperform the capable direct-evaluation baseline**. The later intervention shows that the selected arithmetic family depends strongly on ASan; it is rejected as the main usefulness candidate. [Read the measured results and their limits](docs/results.md).
 
 ## Experimental workflow
 

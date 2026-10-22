@@ -2,7 +2,25 @@
 
 [Overview](overview.md) · [Methodology](methodology.md) · [Evidence index](../evidence/README.md)
 
-All phases below use recorded experiments from **11 October 2026**. Repository publication and reorganization on 21 October did not rerun them. Counts apply to their own phase.
+The latest intervention was executed on **22 October 2026**. Earlier phases use recorded experiments from **11 October**; repository publication on 21 October did not rerun those. Counts apply to their own phase.
+
+## Latest finding: sanitizer-dependent candidate
+
+The matched intervention keeps the compiler, unchanged sources, `-O1`, frame-pointer/debug settings and fuzz-build macro fixed. It varies ASan and coverage flags, comparing original, unpatched native and census compilers within each setting. Two seeded blocks complete **18 full zlib workflows**, upstream tests, **54 real-file round trips** and **nine C++ compilations**: **423 actual compiler executions**, with **345 driver plans counted separately**. Configure and image-preparation compiler actions are additional. All recorded within-setting status, stream, artifact and runtime controls pass.
+
+| Flag setting | Wrapped native call records | Selected ADD64(SRL, Constant) outer windows |
+|---|---:|---:|
+| ASan + coverage | 606,379 | 21,522 |
+| Coverage only | 219,369 | 6 |
+| Neither | 136,654 | 6 |
+
+Each row combines two profiled zlib builds and one profiled C++ compilation. Selected family counts require scalar, depth-zero, demanded-element-one, same-CPU outer windows. Removing ASan reduces this family by **99.97% in this sample**. The four earlier arithmetic captures contain shift `3` and addend `0x7fff8000`, matching [ASan's documented shadow mapping](https://github.com/google/sanitizers/wiki/AddressSanitizerAlgorithm). The census does not capture every constant payload; it does not identify every node's source insertion.
+
+The separate Modal data auditor verifies 2,558 archive members and **962,402 wrapped calls**: 946,257 outer windows and 16,145 nested records. It executes zero compiler actions. The ASan-family median is 622 TSC ticks, including instrumentation overhead; this is neither complete CPU savings nor a worst-case bound. One worker, two blocks and one C++ source limit generalization.
+
+**Decision:** reject this arithmetic family as the principal useful-cache candidate. The earlier negative direct-evaluation comparison remains a separate result. A corrected proof of this small arithmetic, more supported operators or a higher hit rate would not establish the requested useful new policy.
+
+Source: [original intervention audit](../evidence/sanitizer-intervention/audit.json).
 
 ## Scalar reuse candidate
 

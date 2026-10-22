@@ -10,3 +10,4 @@ These selected JSON records were copied without content changes. They retain the
 | [native-transition/contract-audit.json](native-transition/contract-audit.json) | `d4037c3b4f8cf3595b134fd87ef9502e7c3760db22b98727b2935f47985a52ce` |
 | [native-transition/conditional-contract.json](native-transition/conditional-contract.json) | `41399725b74c12d457d2fc1ac52c3238f38055bbe0ca00461e3b38e6bb359f05` |
 | [arithmetic/audit.json](arithmetic/audit.json) | `9c2bf76b89a56036ed007ff847733a0b7f35462db413b2b192d41058d5d63412` |
+| [sanitizer-intervention/audit.json](sanitizer-intervention/audit.json) | `cbe2093a2bcb7d5766433ad1f2fb09f9530879c1244150671ed189c0330b9558` |

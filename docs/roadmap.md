@@ -10,10 +10,11 @@
 - [x] Profile native call costs with calibration and nested-call accounting.
 - [x] Correct native TLS capture and check four selected address-parametric model templates.
 - [x] Check four captured arithmetic native paths and retain the failed parameter-contract attempt.
+- [x] Run matched full-build sanitizer/coverage interventions and reject the strongly ASan-dependent arithmetic candidate.
 
 ## Current construction
 
-- [ ] Derive the arithmetic input relation from the actual native graph rather than assume the right operand's value.
+- [ ] Select useful expensive work in the actual non-ASan native compiler pipeline, using complete-cost comparisons to reject unsuitable candidates.
 - [ ] Establish the supported domain and check complete dependencies, writes, exits and relevant exceptional behavior.
 - [ ] Enforce before-lookup admission, ownership/lifetime requirements and output reconstruction.
 - [ ] Demonstrate useful complete-workflow behavior against equally scoped direct evaluation and normal-fill memoization.

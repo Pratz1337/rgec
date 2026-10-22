@@ -16,6 +16,8 @@ The cost census observes original native computations; it never substitutes an a
 
 RDTSCP windows contain instrumentation overhead and may include preemption and nested logging. They are not automatically native CPU time, a worst-case execution bound or the compute savings of a complete cache policy.
 
+The 22 October intervention additionally uses three flag settings: ASan with coverage, coverage only, and neither. Compiler/source/optimization and the remaining flags stay fixed. Both setting order and within-setting compiler order are seeded. Original/native/census outputs must match within each setting; equality across different instrumentation settings is not expected. All native analysis still executes. The audit reconciles every expected census file and retains setting-specific counts and costs.
+
 ## Native transition checks
 
 Actual compiler execution supplies entry arguments, readable/writable memory, thread-local context and output bytes. The strict angr/VEX checker executes the pinned ELF model and checks the recorded output, preserved registers and stack state. Unsupported accesses, effects, hooks and external execution reject a candidate.
